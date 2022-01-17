@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:instargram/shop.dart';
 import './style.dart' as style;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,11 +9,23 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'notification.dart';
 
-void main() {
+void main() async{
+
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
   runApp(
-      ChangeNotifierProvider(
-        create: (c) => Store1(),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (c) => Store1()),
+          // ChangeNotifierProvider(create: (c) => Store2())
+        ],
         child: MaterialApp(
         theme: style.theme,
         initialRoute: '/',
@@ -92,13 +105,17 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    initNotification(context);
     saveData();
     getData();
+    context.read<Store1>().getData3();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(child: Text('+'),
+        onPressed: () {showNotification2();},),
       appBar: AppBar(
         title: Text('Instagram',style: TextColor,),
         actions: [
@@ -123,7 +140,9 @@ class _MyAppState extends State<MyApp> {
               icon: Icon(Icons.add_box_outlined,size: 36,)),
         )
       ],),
-      body: [ HomeLayout(data : data, addData : addData ), Text('샵페이지')][tab],
+      body: [
+        // MediaQuery.of(context).size.width > 600 ? HomeWidth() : HomeLayout(data : data, addData : addData ), Shop()][tab],
+        HomeLayout(data : data, addData : addData ), Shop()][tab],
       bottomNavigationBar: BottomNavigationBar(
         showSelectedLabels: false,
         showUnselectedLabels: false,
@@ -200,6 +219,7 @@ class _HomeLayoutState extends State<HomeLayout> {
                     transitionDuration: Duration(microseconds: 700)
                   )
                   );
+
                   },
                 ),
                 Text('좋아요 ${widget.data[i]['likes']}'),
@@ -273,6 +293,16 @@ class Store1 extends ChangeNotifier {
   var name = 'john Kim';
   var follower = 0;
   var followerCheck = false;
+
+  var profileImage = [];
+
+  getData3() async{
+   var profile = await http.get(Uri.parse('https://codingapple1.github.io/app/profile.json'));
+    var profile2 = jsonDecode(profile.body);
+    profileImage = profile2;
+    notifyListeners();
+  }
+
   plusFollower(){
     followerCheck == false
     ? follower++
@@ -283,25 +313,45 @@ class Store1 extends ChangeNotifier {
   }
 }
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
-
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(context.watch<Store1>().name, style: TextStyle(color: Colors.black),),),
-      body: Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('팔로워 ${context.watch<Store1>().follower}명'),
-            ElevatedButton(onPressed: (){
-              context.read<Store1>().plusFollower();
-            }, child: Text('버튼'))
+      body:
+      CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Container(
+                margin: EdgeInsets.only(bottom: 20, top: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('팔로워 ${context.watch<Store1>().follower}명'),
+                    ElevatedButton(onPressed: (){
+                      context.read<Store1>().plusFollower();
+                    }, child: Text('팔로우')),
+                  ],
+                ),
+              ),
+            ),
+            SliverGrid(gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+              delegate: SliverChildBuilderDelegate(
+                  (c,i) => Row(
+                    children: [
+                      Image.network(context.watch<Store1>().profileImage[i])
+                    ],
+                  ),
+                childCount: context.read<Store1>().profileImage.length
+              ),),
           ],
         ),
-      )
+
     );
   }
 }
