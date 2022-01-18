@@ -1,6 +1,6 @@
 # instargram
 
-A new Flutter project.
+안드로이드 스튜디오에서 안드로이드 모바일 버전에 맞춰서 진행된 포트폴리오입니다.
 
 ## Getting Started
 
