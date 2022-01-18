@@ -30,16 +30,15 @@ initNotification(context) async {
       Navigator.push(context,
         MaterialPageRoute(builder: (context) => Text('새 페이지'),),);
     }
-    //알림 누를때 함수실행하고 싶으면
-    //onSelectNotification: 함수명추가
+
   );
 }
 
 showNotification() async {
 
   var androidDetails = AndroidNotificationDetails(
-    '유니크한 알림 채널 ID',
-    '알림종류 설명',
+    '',
+    '',
     priority: Priority.high,
     importance: Importance.max,
     color: Color.fromARGB(255, 255, 0, 0),
@@ -52,8 +51,8 @@ showNotification() async {
   // 알림 id, 제목, 내용
   notifications.show(
       1,
-      '제목1',
-      '내용1',
+      '',
+      '',
       NotificationDetails(android: androidDetails, iOS: iosDetails)
   );
 }
@@ -63,8 +62,8 @@ showNotification2() async {
   tz.initializeTimeZones();
 
   var androidDetails = const AndroidNotificationDetails(
-    '유니크한 알림 ID',
-    '알림종류 설명',
+    '',
+    '',
     priority: Priority.high,
     importance: Importance.max,
     color: Color.fromARGB(255, 255, 0, 0),
@@ -78,8 +77,8 @@ showNotification2() async {
   
   notifications.zonedSchedule(
       2,
-      '제목2',
-      '내용2',
+      '',
+      '',
       tz.TZDateTime.now(tz.local),
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       androidAllowWhileIdle: true,

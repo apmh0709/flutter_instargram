@@ -33,7 +33,6 @@ void main() async{
           '/' : (c) => MyApp(),
           '/detail' : (c) => Text('부가페이지')
         },
-        // home: MyApp()
   ),
       ));
 }
